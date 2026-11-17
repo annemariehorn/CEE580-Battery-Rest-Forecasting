@@ -1,0 +1,24 @@
+# Generated outputs (reproduce with the scripts)
+outputs/*
+!outputs/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Notebooks and editors
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Large or private files that should not be committed
+*.zip

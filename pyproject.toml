@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "battery-forecast"
+version = "0.1.0"
+description = "Forecasting lithium-ion battery capacity fade: the role of rest periods (CEE 580 project)"
+requires-python = ">=3.9"
+dependencies = ["numpy", "pandas>=2.2", "scipy", "scikit-learn", "matplotlib"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
