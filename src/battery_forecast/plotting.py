@@ -9,6 +9,22 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 from .config import BATTERIES, EOL_THRESHOLD_AH  # noqa: E402
 
+# Readable names for figure legends (code names use underscores).
+DISPLAY_NAMES = {
+    "persistence": "Persistence",
+    "linear_trend": "Linear trend",
+    "exponential_trend": "Exponential trend",
+    "ridge": "Ridge regression",
+    "boosted_trees": "Boosted trees",
+    "capacity_only": "capacity only",
+    "past_rest": "past rest",
+    "future_rest_oracle": "future rest, oracle",
+}
+
+
+def _label(name):
+    return DISPLAY_NAMES.get(name, name.replace("_", " "))
+
 
 def plot_capacity_history(table, path, long_rest_quantile=0.90):
     """Figure 1: capacity vs discharge measurement, long rests marked."""
@@ -69,7 +85,7 @@ def plot_forecasts(table, predictions, battery, path, models=None):
                 linewidth=1, label="Measured")
         ax.axvline(origin, color="gray", linestyle=":", label="Forecast origin")
         for (model, setting), g in preds[preds["origin_cycle"] == origin].groupby(["model", "setting"]):
-            label = model if setting == "capacity_only" else f"{model} ({setting})"
+            label = _label(model) if setting == "capacity_only" else f"{_label(model)} ({_label(setting)})"
             ax.plot(g["target_cycle"], g["predicted_capacity_ah"], label=label)
         ax.set(title=f"{battery}, origin {origin}", xlabel="Discharge measurement number")
     axes.flat[0].set_ylabel("Capacity (Ah)")
