@@ -11,6 +11,27 @@
 Everyone reviews one other person's pull request before each deliverable, and everyone
 should be able to explain the whole project.
 
+## Milestones (from the progress report)
+
+| By | What |
+|---|---|
+| Nov 23 | Check how uncertain rest durations affect results (shared); trend baselines; ridge and boosted trees tuned on B0005–B0007 |
+| Dec 5 | Ridge and boosted trees compared in all three settings on B0018, with bootstrap intervals; robustness check holding out each battery |
+| Dec 9 | Final report. End of life and extra signals only if time allows |
+
+## Where files go
+
+| What | Where |
+|---|---|
+| Reusable code | `src/battery_forecast/` (e.g. ridge settings in `models.py`) |
+| A script that runs one step | `scripts/` (e.g. `scripts/tune_ridge.py`) |
+| Tests | `tests/` |
+| Scratch exploration | `notebooks/`, with your name in the filename |
+| Decisions and the reason for them | a new row in `docs/decisions.md` |
+| Submitted reports | `docs/` |
+| Figures and results | not committed; the scripts write them to `outputs/` |
+| Raw data | do not edit `data/raw/` |
+
 ## Rules that keep results valid
 
 1. **Never tune on B0018.** It is the test battery. Choose settings by training on two of
