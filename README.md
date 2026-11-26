@@ -52,8 +52,8 @@ src/battery_forecast/
   data.py               build/load the per-discharge table, rest-time estimates
   forecasting.py        forecast examples, hold-out splits, scoring
   baselines.py          persistence, linear trend, exponential trend
-  models.py             ridge regression and boosted trees (untuned starting points)
-  uncertainty.py        block bootstrap (specification, to be implemented)
+  models.py             ridge regression (tuned) and boosted trees (untuned starting point)
+  uncertainty.py        paired block bootstraps for comparing settings
   plotting.py           report figures
 scripts/                runnable steps (see below)
 tests/                  pytest checks, including no-leakage tests
@@ -88,7 +88,8 @@ python scripts/rest_duration_sensitivity.py  # 9. assumed impedance-test length 
 python -m pytest                           # tests
 ```
 
-Or, with `make`: `make all` and `make test`.
+Or, with `make`: `make all` (steps 1–3 and 5–7), `make checks` (steps 4, 8 and 9; slower)
+and `make test`.
 
 ## Current results (as of Nov 26)
 

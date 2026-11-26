@@ -1,6 +1,6 @@
 PY ?= python
 
-.PHONY: all table figures baselines models bootstrap ridge-figure tune test clean
+.PHONY: all checks table figures baselines models bootstrap ridge-figure tune test clean
 
 all: table figures baselines models bootstrap ridge-figure
 
@@ -24,6 +24,11 @@ ridge-figure: models
 
 tune: table
 	$(PY) scripts/tune_ridge.py
+
+# Slower checks behind the ridge result: tuning, robustness, rest-duration sensitivity.
+checks: tune
+	$(PY) scripts/ridge_robustness.py
+	$(PY) scripts/rest_duration_sensitivity.py
 
 test:
 	$(PY) -m pytest -q

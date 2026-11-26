@@ -1,8 +1,9 @@
 """Learned forecasting models: ridge regression and boosted trees.
 
-These are STARTING POINTS, not tuned models. Model owners should:
-  1. choose settings (ridge alpha; tree depth, number of trees, learning rate)
-     by holding out one of B0005-B0007 -- never by looking at B0018;
+Ridge is TUNED (scripts/tune_ridge.py; docs/decisions.md): log rest hours,
+alpha = 1000. Boosted trees are still an UNTUNED starting point. To tune:
+  1. choose settings (tree depth, number of trees, learning rate) by holding
+     out each of B0005-B0007 in turn -- never by looking at B0018;
   2. keep the three information settings identical except for rest features;
   3. record final settings and the reason for them in docs/decisions.md.
 

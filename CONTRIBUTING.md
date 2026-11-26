@@ -4,8 +4,8 @@
 
 | Person | Required | Exploratory | Do first |
 |---|---|---|---|
-| **Annemarie** | Ridge regression in all three settings; block-bootstrap intervals (`uncertainty.py`) | Temperature, charging-time and impedance signals added to ridge; ridge 100-measurement forecasts for end of life | Finish `block_bootstrap_rmse_ratio` early; everyone uses it |
-| **Emi** | Boosted trees in all three settings | Same extra signals added to boosted trees; tree 100-measurement forecasts for end of life | Tune trees on B0005–B0007 before the extra signals |
+| **Annemarie** | Ridge regression in all three settings; bootstrap intervals (`uncertainty.py`); rest-duration check — **all done** | Ridge 100-measurement forecasts for end of life (lower priority); extra signals (lower priority) | Bootstrap is ready: `scripts/bootstrap_comparisons.py` covers every model |
+| **Emi** | Boosted trees in all three settings | Same extra signals added to boosted trees; tree 100-measurement forecasts for end of life | Tune trees on B0005–B0007 the same way as ridge (copy `scripts/tune_ridge.py`) |
 | **Andrew** | Baselines (`baselines.py`, done; check trend window) | How long post-rest gains last; end-of-life prediction from the models' 100-measurement forecasts | Post-rest analysis, which informs the rest features |
 
 Everyone reads over one other person's code before each deliverable, and everyone
@@ -15,7 +15,7 @@ should be able to explain the whole project.
 
 | By | What |
 |---|---|
-| Nov 23 | Check how uncertain rest durations affect results (shared); trend baselines; ridge and boosted trees tuned on B0005–B0007 |
+| Nov 23 | Check how uncertain rest durations affect results (done, Annemarie); trend baselines (done); ridge (done) and boosted trees tuned on B0005–B0007 |
 | Dec 5 | Ridge and boosted trees compared in all three settings on B0018, with bootstrap intervals; robustness check holding out each battery |
 | Dec 9 | Final report. End of life and extra signals only if time allows |
 
