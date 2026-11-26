@@ -1,7 +1,8 @@
 """Step 4: ridge regression and boosted trees in all three information settings.
 
-STARTING POINT: models use untuned default settings from models.py.
-Tune on B0005-B0007 only before reporting results (see CONTRIBUTING.md).
+Ridge is tuned on B0005-B0007 (scripts/tune_ridge.py; docs/decisions.md).
+"ridge" uses log rest hours (final); "ridge_raw_rest" is the first version,
+kept so both B0018 results are reported. Boosted trees are still UNTUNED.
 
 Usage:  python scripts/run_models.py                # held-out B0018
         python scripts/run_models.py --all-holdouts # also hold out each other battery
@@ -48,5 +49,5 @@ pooled["rmse_change_vs_capacity_only_pct"] = [
 ]
 
 pd.set_option("display.width", 140)
-print("UNTUNED starting-point results, pooled over origins (horizons 20-50, mAh):")
+print("Pooled over origins (horizons 20-50, mAh). Ridge tuned; boosted trees UNTUNED:")
 print(pooled.round(1).to_string(index=False))

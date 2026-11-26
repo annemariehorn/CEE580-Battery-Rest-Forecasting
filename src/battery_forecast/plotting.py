@@ -15,6 +15,7 @@ DISPLAY_NAMES = {
     "linear_trend": "Linear trend",
     "exponential_trend": "Exponential trend",
     "ridge": "Ridge regression",
+    "ridge_raw_rest": "Ridge (raw rest hours)",
     "boosted_trees": "Boosted trees",
     "capacity_only": "capacity only",
     "past_rest": "past rest",

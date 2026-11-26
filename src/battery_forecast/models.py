@@ -20,14 +20,42 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import FunctionTransformer, StandardScaler
+
+from .forecasting import FUTURE_REST_FEATURES, PAST_REST_FEATURES
 
 RANDOM_STATE = 0
 
 
-def make_ridge(alpha=3000):
-    """Ridge regression with features standardized on the training data only."""
-    return make_pipeline(StandardScaler(), Ridge(alpha=alpha))
+REST_FEATURES = PAST_REST_FEATURES + FUTURE_REST_FEATURES
+
+
+def log_rest_features(X):
+    """Replace rest times (hours) with log(1 + hours).
+
+    Capacity recovery levels off for long rests, so a 241 h rest should not
+    count 241 times as much as a 1 h rest. Capacity inputs are unchanged.
+    """
+    X = X.copy()
+    cols = [c for c in REST_FEATURES if c in X.columns]
+    X[cols] = np.log1p(X[cols])
+    return X
+
+
+def make_ridge(alpha=1000, log_rest=True):
+    """Ridge regression with features standardized on the training data only.
+
+    Final choice (docs/decisions.md): log rest times, alpha = 1000.
+    The original version (raw rest hours, alpha = 3000) is kept as
+    "ridge_raw_rest" so both results can be reported.
+    """
+    steps = [FunctionTransformer(log_rest_features)] if log_rest else []
+    return make_pipeline(*steps, StandardScaler(), Ridge(alpha=alpha))
+
+
+def make_ridge_raw_rest(alpha=3000):
+    """Original ridge: raw rest hours (first B0018 result, Nov 26)."""
+    return make_ridge(alpha=alpha, log_rest=False)
 
 
 def make_boosted_trees(
@@ -44,6 +72,7 @@ def make_boosted_trees(
 
 MODEL_FACTORIES = {
     "ridge": make_ridge,
+    "ridge_raw_rest": make_ridge_raw_rest,
     "boosted_trees": make_boosted_trees,
 }
 

@@ -30,3 +30,11 @@ def test_persistence_is_last_value():
     table = _synthetic("linear")
     ex = make_forecast_examples(table, origins=[40])
     assert np.allclose(persistence(ex), table.loc[39, "capacity_ah"])
+
+
+def test_log_rest_only_changes_rest_columns():
+    from battery_forecast.models import log_rest_features
+    X = pd.DataFrame({"current_capacity_ah": [1.8, 1.7], "last_rest_upper_bound_h": [0.0, 241.0]})
+    out = log_rest_features(X)
+    assert out["current_capacity_ah"].tolist() == [1.8, 1.7]
+    np.testing.assert_allclose(out["last_rest_upper_bound_h"], np.log1p([0.0, 241.0]))
