@@ -82,6 +82,7 @@ python scripts/tune_ridge.py               # 4. choose ridge settings on B0005-B
 python scripts/run_models.py               # 5. ridge (tuned) + boosted trees (untuned) on B0018
 python scripts/run_models.py --all-holdouts  #   + robustness: hold out each battery
 python scripts/bootstrap_comparisons.py    # 6. 95% intervals: does rest information help?
+python scripts/make_ridge_figure.py        # 7. ridge forecasts with/without future rest
 python -m pytest                           # tests
 ```
 

@@ -1,8 +1,8 @@
 PY ?= python
 
-.PHONY: all table figures baselines models bootstrap tune test clean
+.PHONY: all table figures baselines models bootstrap ridge-figure tune test clean
 
-all: table figures baselines models bootstrap
+all: table figures baselines models bootstrap ridge-figure
 
 table:
 	$(PY) scripts/build_table.py
@@ -18,6 +18,9 @@ models: table
 
 bootstrap: models
 	$(PY) scripts/bootstrap_comparisons.py
+
+ridge-figure: models
+	$(PY) scripts/make_ridge_figure.py
 
 tune: table
 	$(PY) scripts/tune_ridge.py
