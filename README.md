@@ -83,6 +83,7 @@ python scripts/run_models.py               # 5. ridge (tuned) + boosted trees (u
 python scripts/run_models.py --all-holdouts  #   + robustness: hold out each battery
 python scripts/bootstrap_comparisons.py    # 6. 95% intervals: does rest information help?
 python scripts/make_ridge_figure.py        # 7. ridge forecasts with/without future rest
+python scripts/ridge_robustness.py         # 8. robustness: other batteries, origins, horizons (~2 min)
 python -m pytest                           # tests
 ```
 
@@ -102,6 +103,10 @@ block bootstrap (block length 10).
 | Ridge, raw rest hours (first version) | 35.5 | 35.5 (no change) | 36.7 (3.3% worse; interval includes 0) |
 | **Ridge, log rest hours (final)** | **34.7** | 33.5 (−3.7%; interval includes 0) | **25.1 (−27.9%; 95% interval 11 to 50% lower)** |
 | Boosted trees, **untuned** | 44.4 | 43.7 | 31.6 |
+
+Robustness (`scripts/ridge_robustness.py`): future rest also lowers ridge RMSE with each of
+B0005–B0007 as the test battery (8–19%), at 9 of 13 origins from 20 to 80 on B0018 (worse
+at one, origin 65), and for every horizon window (28–56%).
 
 Ridge settings were chosen on B0005–B0007 only (`docs/decisions.md`). B0018 was scored
 first with raw rest hours and then with log rest hours; both are reported. Boosted trees
