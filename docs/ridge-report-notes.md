@@ -20,7 +20,9 @@ and three external reviews. Numbers come from the scripts named in brackets.
 - **Results differ by origin:** capacity only → future rest RMSE is 34 → 32 (origin 30),
   16 → 16 (origin 45), 47 → 24 mAh (origin 60). Most of the pooled 27.9% comes from origin 60.
 - **Raw vs log rest:** with raw hours future rest did not help (35.5 → 36.7 mAh); with log hours
-  it did (34.7 → 25.1). Raw hours impose a straight-line relationship between each rest feature
+  it did (34.7 → 25.1). Alpha also changed (3000 → 1000), so the B0018 comparison does not isolate
+  the transform; the validation batteries do: log beats raw at the same alpha (55.1 vs 57.9 mAh at
+  1000; 56.0 vs 57.8 at 3000). Raw hours impose a straight-line relationship between each rest feature
   and the predicted capacity change; the log allows diminishing effects as rests get longer and
   reduces the influence of exceptionally long rests.
 - **How independent B0018 is:** it was held out from model fitting, but the log transform was
@@ -41,7 +43,9 @@ and three external reviews. Numbers come from the scripts named in brackets.
 - **Rest-duration sensitivity:** primary result uses the original upper-bound rests (0 min).
   Assuming 15 / 32 min per impedance test (each capped at its own timestamp window), the gain
   is 23.2% / 15.4%. The remaining gain may come from genuinely long rests (plausible, not shown).
-- **Robustness checks** used the original rest estimates.
+- **Robustness checks** used the original rest estimates. Origin counts use a 5% threshold:
+  future rest lowers RMSE by more than 5% at 9 of 13 origins, raises it by more than 5% at one
+  (65), and changes it by less than 5% at three.
 - **Against the 10% hypothesis:** the log-rest point estimates exceed 10% under all three
   rest-duration assumptions (27.9 / 23.2 / 15.4%), but the intervals do not establish that the
   improvement reliably exceeds 10%, and the raw-rest specification did not support it.
