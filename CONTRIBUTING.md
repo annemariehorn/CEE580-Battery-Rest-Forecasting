@@ -8,7 +8,7 @@
 | **Emi** | Boosted trees in all three settings | Same extra signals added to boosted trees; tree 100-measurement forecasts for end of life | Tune trees on B0005–B0007 before the extra signals |
 | **Andrew** | Baselines (`baselines.py`, done; check trend window) | How long post-rest gains last; end-of-life prediction from the models' 100-measurement forecasts | Post-rest analysis, which informs the rest features |
 
-Everyone reviews one other person's pull request before each deliverable, and everyone
+Everyone reads over one other person's code before each deliverable, and everyone
 should be able to explain the whole project.
 
 ## Milestones (from the progress report)
@@ -48,18 +48,22 @@ should be able to explain the whole project.
 
 ## Git workflow
 
+We each work on different files, so we commit straight to `main`.
+
 ```bash
-git pull                                 # start from the latest main
-git switch -c ridge-tuning               # one branch per piece of work
+git pull                                 # before you start: get everyone's changes
 # ...edit, then run the tests...
 python -m pytest
-git add -A && git commit -m "Tune ridge alpha on B0005-B0007"
-git push -u origin ridge-tuning          # open a pull request; a teammate reviews it
+git add scripts/tune_ridge.py            # the files you changed
+git commit -m "Tune ridge alpha on B0005-B0007"
+git pull                                 # just before pushing, in case someone else pushed
+git push
 ```
 
-- Keep `main` runnable: scripts and tests should work after every merge.
-- Do not commit generated files (`outputs/`, `data/processed/`); they are rebuilt by the scripts.
-- Put exploratory notebooks in `notebooks/` with your name in the filename.
+- Only push when the tests pass, so `main` always runs.
+- Tell the group before changing shared code (`forecasting.py`, `data.py`, `config.py`);
+  everyone's results depend on it. For a big change there, use a branch and a pull request.
+- Do not commit generated files (`outputs/`, `data/processed/`); the scripts rebuild them.
 - Record every design choice and its reason in `docs/decisions.md`.
 
 ## Adding a model
