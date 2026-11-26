@@ -78,31 +78,33 @@ pip install -r requirements.txt
 python scripts/build_table.py              # 1. per-discharge table  -> data/processed/
 python scripts/make_figures.py             # 2. Figures 1-2          -> outputs/figures/
 python scripts/run_baselines.py            # 3. baselines on B0018   -> outputs/results/
-python scripts/run_models.py               # 4. ridge + boosted trees (untuned)
+python scripts/tune_ridge.py               # 4. choose ridge settings on B0005-B0007 (slow, ~1-2 min)
+python scripts/run_models.py               # 5. ridge (tuned) + boosted trees (untuned) on B0018
 python scripts/run_models.py --all-holdouts  #   + robustness: hold out each battery
+python scripts/bootstrap_comparisons.py    # 6. 95% intervals: does rest information help?
 python -m pytest                           # tests
 ```
 
 Or, with `make`: `make all` and `make test`.
 
-## Current results (as of Nov 14)
+## Current results (as of Nov 26)
 
 RMSE (mAh) on B0018, horizons 20–50, pooled over origins 30, 45 and 60.
+"Change" is relative to the same model with capacity only; the 95% interval is from a
+block bootstrap (block length 10).
 
-| Method | Setting | RMSE (mAh) |
-|---|---|---|
-| Persistence (capacity stays the same) | capacity only | 154.5 |
-| Linear trend (last 20 measurements) | capacity only | 94.9 |
-| Exponential trend (last 20 measurements) | capacity only | 87.4 |
-| Ridge, **untuned** | capacity only | 38.5 |
-| Ridge, **untuned** | past rest | 39.1 |
-| Ridge, **untuned** | future rest (oracle) | 44.6 |
-| Boosted trees, **untuned** | capacity only | 44.4 |
-| Boosted trees, **untuned** | past rest | 43.7 |
-| Boosted trees, **untuned** | future rest (oracle) | 31.6 |
+| Method | Capacity only | + past rest | + future rest (oracle) |
+|---|---|---|---|
+| Persistence | 154.5 | | |
+| Linear trend (last 20 measurements) | 94.9 | | |
+| Exponential trend (last 20 measurements) | 87.4 | | |
+| Ridge, raw rest hours (first version) | 35.5 | 35.5 (no change) | 36.7 (3.3% worse; interval includes 0) |
+| **Ridge, log rest hours (final)** | **34.7** | 33.5 (−3.7%; interval includes 0) | **25.1 (−27.9%; 95% interval 11 to 50% lower)** |
+| Boosted trees, **untuned** | 44.4 | 43.7 | 31.6 |
 
-Persistence matches Table 2 of the progress report. The model rows use default settings
-and are not results to report until tuned on B0005–B0007 (see `CONTRIBUTING.md`).
+Ridge settings were chosen on B0005–B0007 only (`docs/decisions.md`). B0018 was scored
+first with raw rest hours and then with log rest hours; both are reported. Boosted trees
+are not results to report until tuned the same way.
 
 ## Key dates
 

@@ -1,8 +1,8 @@
 PY ?= python
 
-.PHONY: all table figures baselines models test clean
+.PHONY: all table figures baselines models bootstrap tune test clean
 
-all: table figures baselines models
+all: table figures baselines models bootstrap
 
 table:
 	$(PY) scripts/build_table.py
@@ -15,6 +15,12 @@ baselines: table
 
 models: table
 	$(PY) scripts/run_models.py
+
+bootstrap: models
+	$(PY) scripts/bootstrap_comparisons.py
+
+tune: table
+	$(PY) scripts/tune_ridge.py
 
 test:
 	$(PY) -m pytest -q
