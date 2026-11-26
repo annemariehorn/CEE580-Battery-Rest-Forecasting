@@ -173,3 +173,20 @@ def first_cycle_below(table: pd.DataFrame, threshold_ah: float) -> pd.Series:
         return below.iloc[0] if len(below) else np.nan
 
     return table.groupby("battery_id").apply(_first, include_groups=False)
+
+
+def adjust_rest_for_impedance(table: pd.DataFrame, minutes_per_test: float) -> pd.DataFrame:
+    """Rest-duration sensitivity: assume each impedance test lasted `minutes_per_test`.
+
+    Impedance tests have no recorded duration, so the stored rest times are
+    upper bounds. This subtracts minutes_per_test for every impedance test in
+    each gap (floored at 0). 0 minutes returns the original estimates.
+    Timestamps show the next operation starts about 32 minutes after an
+    impedance test begins, so about 32 minutes is the largest plausible value.
+    """
+    if minutes_per_test < 0:
+        raise ValueError("minutes_per_test must be non-negative.")
+    out = table.copy()
+    correction_h = out["impedance_tests_between"].fillna(0) * minutes_per_test / 60
+    out["rest_time_upper_bound_h"] = (out["rest_time_upper_bound_h"] - correction_h).clip(lower=0)
+    return out

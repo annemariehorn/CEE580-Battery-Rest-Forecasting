@@ -31,8 +31,11 @@ Two versions
    MEASUREMENTS BEING PREDICTED. Origins overlap (origins 30 and 45 both
    predict measurement 70), so forecasts of the same measurement are kept
    together. This gives wider intervals.
-Report both. Either way, the intervals describe uncertainty over B0018's
-forecasts only, not over which battery is tested.
+Report both, as approximate "sensitivity intervals" rather than formal 95%
+confidence intervals: with about 61 predicted measurements and blocks of 10,
+each draw has only about 6 blocks, so coverage is not guaranteed. Either way,
+the intervals describe uncertainty over B0018's forecasts only, not over
+which battery is tested.
 """
 
 import numpy as np
@@ -67,6 +70,18 @@ def _block_indices(n, block_length, rng):
     starts = rng.integers(0, n - block_length + 1, size=n_blocks)
     idx = (starts[:, None] + np.arange(block_length)[None, :]).ravel()
     return idx[:n]
+
+
+def target_resample_indices(targets, block_length, rng):
+    """Row indices for one target-block resample.
+
+    Picks moving blocks of unique predicted measurements and returns EVERY
+    forecast row that predicts each picked measurement (from any origin).
+    """
+    targets = np.asarray(targets)
+    unique = np.unique(targets)
+    picked = _block_indices(len(unique), block_length, rng)
+    return np.concatenate([np.flatnonzero(targets == unique[j]) for j in picked])
 
 
 def _summarise(a, b, reductions, block_length, n_boot):
@@ -137,13 +152,17 @@ def target_block_bootstrap_rmse_ratio(
         origins is kept. Same return value as block_bootstrap_rmse_ratio.
     """
     a, b, targets = _check_inputs(errors_a_mah, errors_b_mah, targets, block_length, n_boot)
-    unique = np.unique(targets)
-    rows_for = [np.flatnonzero(targets == t) for t in unique]
     rng = np.random.default_rng(seed)
 
     reductions = np.empty(n_boot)
+    rows = np.empty(n_boot, dtype=int)
     for i in range(n_boot):
-        picked = _block_indices(len(unique), block_length, rng)
-        idx = np.concatenate([rows_for[j] for j in picked])
+        idx = target_resample_indices(targets, block_length, rng)
+        rows[i] = len(idx)
         reductions[i] = 1 - rmse(b[idx]) / rmse(a[idx])
-    return _summarise(a, b, reductions, block_length, n_boot)
+    out = _summarise(a, b, reductions, block_length, n_boot)
+    # Draws can contain more or fewer rows than the data, because some
+    # measurements are predicted from 1 origin and others from 2-3.
+    out.update(rows_per_draw_min=int(rows.min()), rows_per_draw_mean=float(rows.mean()),
+               rows_per_draw_max=int(rows.max()))
+    return out

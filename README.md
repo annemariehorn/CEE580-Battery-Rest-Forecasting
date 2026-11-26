@@ -84,6 +84,7 @@ python scripts/run_models.py --all-holdouts  #   + robustness: hold out each bat
 python scripts/bootstrap_comparisons.py    # 6. 95% intervals: does rest information help?
 python scripts/make_ridge_figure.py        # 7. ridge forecasts with/without future rest
 python scripts/ridge_robustness.py         # 8. robustness: other batteries, origins, horizons (~2 min)
+python scripts/rest_duration_sensitivity.py  # 9. assumed impedance-test length 0/15/32 min
 python -m pytest                           # tests
 ```
 
@@ -102,7 +103,7 @@ RMSE (mAh) on B0018, horizons 20–50, pooled over origins 30, 45 and 60.
 | **Ridge, log rest hours (refinement)** | **34.7** | 33.5 | **25.1** |
 | Boosted trees, **untuned** | 44.4 | 43.7 | 31.6 |
 
-Improvement for ridge with log rest hours, with two 95% block-bootstrap intervals
+Improvement for ridge with log rest hours, with two approximate 95% bootstrap sensitivity intervals
 (`scripts/bootstrap_comparisons.py`, block length 10):
 
 | Comparison | Reduction | Within-origin interval | Cautious interval* |
@@ -115,6 +116,14 @@ Improvement for ridge with log rest hours, with two 95% block-bootstrap interval
 safer interval to quote. Its lower end moves between about −6% and +8% with block length
 (5–15), so the improvement is large and positive in about 97% of resamples, but its exact
 size is uncertain with one independent test battery.
+
+Rest-duration sensitivity (`scripts/rest_duration_sensitivity.py`): rest times are upper
+bounds because impedance-test durations were not recorded. Timestamps show the next operation
+starts about 32 minutes after each test begins, so tests took at most about 32 minutes.
+Assuming 0 / 15 / 32 minutes per test, future rest improves ridge by 27.9% / 23.2% / 15.4%
+over capacity only (and 25.1% / 18.6% / 8.7% over past rest). The improvement stays positive
+but shrinks, and its intervals widen, as rest is corrected: the result is sensitive to how
+rest is measured.
 
 Robustness (`scripts/ridge_robustness.py`): future rest also lowers ridge RMSE with each of
 B0005–B0007 as the test battery (8–19%), at 9 of 13 origins from 20 to 80 on B0018 (worse

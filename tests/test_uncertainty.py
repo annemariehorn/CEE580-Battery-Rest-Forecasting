@@ -68,3 +68,18 @@ def test_rejects_bad_inputs(bad):
         g = g[:-1]
     with pytest.raises(ValueError):
         block_bootstrap_rmse_ratio(a, b, g, n_boot=10)
+
+
+def test_target_resample_keeps_all_rows_of_each_measurement():
+    """The defining property: every forecast of a picked measurement is included."""
+    from collections import Counter
+    from battery_forecast.uncertainty import target_resample_indices
+
+    rng = np.random.default_rng(0)
+    for _ in range(50):
+        idx = target_resample_indices(TARGETS, 10, rng)
+        rows_per_target = Counter(TARGETS)
+        picked = Counter(TARGETS[idx])
+        for target, count in picked.items():
+            # Each pick of a measurement brings all of its rows, so counts are multiples.
+            assert count % rows_per_target[target] == 0

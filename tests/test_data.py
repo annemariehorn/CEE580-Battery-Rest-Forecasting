@@ -53,3 +53,23 @@ def test_raw_event_chronology():
             times = np.asarray(events[i]["data"].get("Time", []), dtype=float).ravel()
             if len(times):
                 assert gap - times[-1] > -60, f"{battery}: event {i} overlaps the next one"
+
+
+def test_adjust_rest_for_impedance(table):
+    import pandas as pd
+    import pytest
+    from battery_forecast.data import adjust_rest_for_impedance
+
+    same = adjust_rest_for_impedance(table, 0)
+    pd.testing.assert_frame_equal(same, table)
+
+    shorter = adjust_rest_for_impedance(table, 15)
+    has_test = table["impedance_tests_between"].fillna(0) > 0
+    # Rests without impedance tests are unchanged; others shrink but never below 0.
+    pd.testing.assert_series_equal(shorter.loc[~has_test, "rest_time_upper_bound_h"],
+                                   table.loc[~has_test, "rest_time_upper_bound_h"])
+    changed = shorter.loc[has_test, "rest_time_upper_bound_h"].dropna()
+    assert (changed <= table.loc[changed.index, "rest_time_upper_bound_h"]).all()
+    assert (adjust_rest_for_impedance(table, 10_000)["rest_time_upper_bound_h"].dropna() >= 0).all()
+    with pytest.raises(ValueError):
+        adjust_rest_for_impedance(table, -1)
