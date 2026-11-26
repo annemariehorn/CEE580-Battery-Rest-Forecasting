@@ -175,18 +175,52 @@ def first_cycle_below(table: pd.DataFrame, threshold_ah: float) -> pd.Series:
     return table.groupby("battery_id").apply(_first, include_groups=False)
 
 
-def adjust_rest_for_impedance(table: pd.DataFrame, minutes_per_test: float) -> pd.DataFrame:
+def impedance_test_windows(raw_dir: Path = RAW_DIR, batteries=BATTERIES) -> pd.DataFrame:
+    """Time available for each impedance test inside a rest gap.
+
+    One row per impedance test that falls between two discharges:
+    battery_id, discharge_cycle (the discharge that ends the gap), and
+    window_min = minutes from the test's start to the next operation's start.
+    The window is an upper bound on that test's duration (it may include idle time).
+    """
+    rows = []
+    for battery in batteries:
+        events = loadmat(_find_battery_file(raw_dir, battery), simplify_cells=True)[battery]["cycle"]
+        discharges_seen = 0
+        battery_rows = []
+        for i, event in enumerate(events):
+            if event["type"] == "discharge":
+                discharges_seen += 1
+            elif event["type"] == "impedance" and discharges_seen > 0 and i + 1 < len(events):
+                window = read_timestamp(events[i + 1]["time"]) - read_timestamp(event["time"])
+                battery_rows.append({"battery_id": battery, "discharge_cycle": discharges_seen + 1,
+                                     "window_min": window.total_seconds() / 60})
+        # Tests after the last discharge belong to no rest gap.
+        rows.extend(r for r in battery_rows if r["discharge_cycle"] <= discharges_seen)
+    return pd.DataFrame(rows, columns=["battery_id", "discharge_cycle", "window_min"])
+
+
+def adjust_rest_for_impedance(table: pd.DataFrame, minutes_per_test: float,
+                              windows: pd.DataFrame = None) -> pd.DataFrame:
     """Rest-duration sensitivity: assume each impedance test lasted `minutes_per_test`.
 
     Impedance tests have no recorded duration, so the stored rest times are
-    upper bounds. This subtracts minutes_per_test for every impedance test in
-    each gap (floored at 0). 0 minutes returns the original estimates.
-    Timestamps show the next operation starts about 32 minutes after an
-    impedance test begins, so about 32 minutes is the largest plausible value.
+    upper bounds. For every impedance test in a gap this subtracts
+    min(minutes_per_test, that test's timestamp window), so no test is assumed
+    to last longer than the time before the next operation started.
+    The result is floored at 0. 0 minutes returns the original estimates.
+    The typical window is about 32 minutes.
     """
     if minutes_per_test < 0:
         raise ValueError("minutes_per_test must be non-negative.")
     out = table.copy()
-    correction_h = out["impedance_tests_between"].fillna(0) * minutes_per_test / 60
+    if minutes_per_test == 0:
+        return out
+    if windows is None:
+        windows = impedance_test_windows(batteries=sorted(table["battery_id"].unique()))
+    w = windows.assign(minutes=windows["window_min"].clip(upper=minutes_per_test))
+    correction = w.groupby(["battery_id", "discharge_cycle"])["minutes"].sum() / 60
+    key = pd.MultiIndex.from_frame(out[["battery_id", "discharge_cycle"]])
+    correction_h = pd.Series(correction.reindex(key).fillna(0).to_numpy(), index=out.index)
     out["rest_time_upper_bound_h"] = (out["rest_time_upper_bound_h"] - correction_h).clip(lower=0)
     return out

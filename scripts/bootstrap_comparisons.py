@@ -9,8 +9,9 @@ forecasts (horizons 20-50):
 Two approximate 95% sensitivity intervals are reported (see uncertainty.py):
   within_origin : blocks of horizons within each origin
   cautious      : target-block bootstrap: blocks of predicted measurements,
-                  keeping overlapping origins together (wider; the safer one
-                  to quote). Not a formally validated confidence interval.
+                  keeping overlapping origins together (accounts for more of
+                  the dependence; usually wider, but not guaranteed to be
+                  conservative). Not a formally validated confidence interval.
 Block lengths 5, 10 and 15 are saved to check sensitivity to that choice.
 
 Usage:  python scripts/run_models.py      (creates the predictions first)
@@ -92,7 +93,7 @@ pd.set_option("display.width", 160)
 print(f"RMSE reduction on {TEST_BATTERY}, in % (positive = the comparison setting is better).")
 print("Approximate 95% bootstrap sensitivity intervals, block length 10. If an interval")
 print("includes 0, the difference is not clearly established. 'cautious' (target-block) keeps")
-print("overlapping forecasts together and is the safer interval to quote. 'prob_better' is the")
+print("overlapping forecasts together, accounting for more dependence. 'prob_better' is the")
 print("share of resamples favouring the comparison, not the probability that it is truly better.\n")
 print(show.drop(columns=["block_length", "cautious_rows_min", "cautious_rows_mean",
                          "cautious_rows_max"]).to_string(index=False))

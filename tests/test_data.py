@@ -73,3 +73,24 @@ def test_adjust_rest_for_impedance(table):
     assert (adjust_rest_for_impedance(table, 10_000)["rest_time_upper_bound_h"].dropna() >= 0).all()
     with pytest.raises(ValueError):
         adjust_rest_for_impedance(table, -1)
+
+
+def test_impedance_windows_match_table_counts(table):
+    """Every impedance test counted in the table has exactly one timing window."""
+    from battery_forecast.data import impedance_test_windows
+    w = impedance_test_windows()
+    counts = w.groupby(["battery_id", "discharge_cycle"]).size()
+    t = table.set_index(["battery_id", "discharge_cycle"])["impedance_tests_between"]
+    t = t[t.fillna(0) > 0]
+    assert counts.sort_index().to_dict() == t.astype(int).sort_index().to_dict()
+
+
+def test_adjustment_never_exceeds_a_tests_window(table):
+    from battery_forecast.data import adjust_rest_for_impedance, impedance_test_windows
+    w = impedance_test_windows()
+    big = adjust_rest_for_impedance(table, 10_000, windows=w)
+    removed_h = (table["rest_time_upper_bound_h"] - big["rest_time_upper_bound_h"]).fillna(0)
+    allowed_h = (w.groupby(["battery_id", "discharge_cycle"])["window_min"].sum() / 60)
+    key = list(zip(table["battery_id"], table["discharge_cycle"]))
+    allowed = np.array([allowed_h.get(k, 0.0) for k in key])
+    assert (removed_h.to_numpy() <= allowed + 1e-9).all()
