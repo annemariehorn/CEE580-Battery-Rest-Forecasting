@@ -35,3 +35,36 @@ def test_interval_contains_estimate_for_unrelated_errors():
     a, b = _errors(1), _errors(2)
     out = block_bootstrap_rmse_ratio(a, b, GROUPS, n_boot=500)
     assert out["ci_low"] < out["reduction"] < out["ci_high"]
+
+
+TARGETS = np.concatenate([np.arange(50, 81), np.arange(65, 96), np.arange(80, 111)])
+
+
+def test_cautious_identical_and_halved():
+    from battery_forecast.uncertainty import target_block_bootstrap_rmse_ratio
+    a = _errors()
+    same = target_block_bootstrap_rmse_ratio(a, a, TARGETS, n_boot=200)
+    assert same["reduction"] == 0 and same["ci_low"] == pytest.approx(0)
+    half = target_block_bootstrap_rmse_ratio(a, 0.5 * a, TARGETS, n_boot=200)
+    assert half["ci_low"] == pytest.approx(0.5) and half["ci_high"] == pytest.approx(0.5)
+
+
+def test_both_methods_share_point_estimate():
+    from battery_forecast.uncertainty import target_block_bootstrap_rmse_ratio
+    a, b = _errors(1), _errors(2)
+    within = block_bootstrap_rmse_ratio(a, b, GROUPS, n_boot=1000)
+    cautious = target_block_bootstrap_rmse_ratio(a, b, TARGETS, n_boot=1000)
+    assert cautious["reduction"] == within["reduction"]  # same data, same point estimate
+
+
+@pytest.mark.parametrize("bad", ["nan", "zero", "length"])
+def test_rejects_bad_inputs(bad):
+    a, b, g = _errors(1), _errors(2), GROUPS
+    if bad == "nan":
+        b = b.copy(); b[3] = np.nan
+    elif bad == "zero":
+        a = np.zeros_like(a)
+    else:
+        g = g[:-1]
+    with pytest.raises(ValueError):
+        block_bootstrap_rmse_ratio(a, b, g, n_boot=10)

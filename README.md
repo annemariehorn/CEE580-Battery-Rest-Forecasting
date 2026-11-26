@@ -92,17 +92,29 @@ Or, with `make`: `make all` and `make test`.
 ## Current results (as of Nov 26)
 
 RMSE (mAh) on B0018, horizons 20–50, pooled over origins 30, 45 and 60.
-"Change" is relative to the same model with capacity only; the 95% interval is from a
-block bootstrap (block length 10).
 
 | Method | Capacity only | + past rest | + future rest (oracle) |
 |---|---|---|---|
 | Persistence | 154.5 | | |
 | Linear trend (last 20 measurements) | 94.9 | | |
 | Exponential trend (last 20 measurements) | 87.4 | | |
-| Ridge, raw rest hours (first version) | 35.5 | 35.5 (no change) | 36.7 (3.3% worse; interval includes 0) |
-| **Ridge, log rest hours (final)** | **34.7** | 33.5 (−3.7%; interval includes 0) | **25.1 (−27.9%; 95% interval 11 to 50% lower)** |
+| Ridge, raw rest hours (initial specification) | 35.5 | 35.5 | 36.7 |
+| **Ridge, log rest hours (refinement)** | **34.7** | 33.5 | **25.1** |
 | Boosted trees, **untuned** | 44.4 | 43.7 | 31.6 |
+
+Improvement for ridge with log rest hours, with two 95% block-bootstrap intervals
+(`scripts/bootstrap_comparisons.py`, block length 10):
+
+| Comparison | Reduction | Within-origin interval | Cautious interval* |
+|---|---|---|---|
+| Past rest vs capacity only | 3.7% | −0.4 to 9.5% | −4.6 to 8.7% |
+| Future rest vs capacity only | 27.9% | 10.8 to 49.6% | −1.7 to 52.5% |
+| Future rest vs past rest | 25.1% | 10.7 to 44.2% | 2.7 to 48.4% |
+
+\*Keeps forecasts of the same measurement from overlapping origins together; wider, and the
+safer interval to quote. Its lower end moves between about −6% and +8% with block length
+(5–15), so the improvement is large and positive in about 97% of resamples, but its exact
+size is uncertain with one independent test battery.
 
 Robustness (`scripts/ridge_robustness.py`): future rest also lowers ridge RMSE with each of
 B0005–B0007 as the test battery (8–19%), at 9 of 13 origins from 20 to 80 on B0018 (worse

@@ -32,3 +32,24 @@ def test_end_of_life_crossings(table):
     first = first_cycle_below(table, 1.5).to_dict()
     assert first == {"B0005": 99, "B0006": 76, "B0007": 126, "B0018": 70}
     assert np.isnan(first_cycle_below(table, 1.4)["B0007"])
+
+
+def test_raw_event_chronology():
+    """Operations start in time order, and none starts before the previous one ends.
+
+    The rest estimate subtracts recorded operation durations from the gap
+    between discharges, which is only valid if operations do not overlap.
+    """
+    from scipy.io import loadmat
+    from battery_forecast.config import RAW_DIR
+    from battery_forecast.data import read_timestamp
+
+    for battery in BATTERIES:
+        events = loadmat(RAW_DIR / f"{battery}.mat", simplify_cells=True)[battery]["cycle"]
+        starts = [read_timestamp(e["time"]) for e in events]
+        for i in range(len(events) - 1):
+            gap = (starts[i + 1] - starts[i]).total_seconds()
+            assert gap >= 0, f"{battery}: event {i + 1} starts before event {i}"
+            times = np.asarray(events[i]["data"].get("Time", []), dtype=float).ravel()
+            if len(times):
+                assert gap - times[-1] > -60, f"{battery}: event {i} overlaps the next one"
