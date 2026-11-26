@@ -25,13 +25,14 @@ from sklearn.preprocessing import StandardScaler
 RANDOM_STATE = 0
 
 
-def make_ridge(alpha=1.0):
+def make_ridge(alpha=3000):
     """Ridge regression with features standardized on the training data only."""
     return make_pipeline(StandardScaler(), Ridge(alpha=alpha))
 
 
-def make_boosted_trees(max_depth=2, n_estimators=300, learning_rate=0.05,
-                       random_state=RANDOM_STATE):
+def make_boosted_trees(
+    max_depth=2, n_estimators=300, learning_rate=0.05, random_state=RANDOM_STATE
+):
     """Gradient-boosted trees. Keep trees shallow: only three training batteries."""
     return GradientBoostingRegressor(
         max_depth=max_depth,
@@ -61,7 +62,9 @@ def fit_predict(model, split, predict_change=True):
 
     if predict_change:
         model.fit(X_train, y_train - X_train["current_capacity_ah"])
-        return np.asarray(model.predict(X_test)) + X_test["current_capacity_ah"].to_numpy()
+        return (
+            np.asarray(model.predict(X_test)) + X_test["current_capacity_ah"].to_numpy()
+        )
 
     model.fit(X_train, y_train)
     return np.asarray(model.predict(X_test))

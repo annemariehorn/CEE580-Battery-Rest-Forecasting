@@ -14,3 +14,4 @@ it feeds directly into the "Preprocessing" and "Methods" sections of the reports
 | Nov | Future rest treated as an **oracle** input | Recorded rest times were not necessarily planned in advance; the oracle measures the most that rest information could help |
 | Nov 14 | Models predict the capacity *change* from the origin, then add current capacity back | Batteries start at different capacities (1.86–2.04 Ah); the change transfers across batteries better than the level |
 | Nov 14 | Trend baselines fit the last 20 measurements | Long enough to average out single jumps; short enough to follow recent fade. Sensitivity to this window still to be checked |
+| Nov 26 | Ridge alpha = 3000 for all three settings | Lowest mean RMSE holding out each of B0005–B0007 in turn (57.8 mAh; alpha = 1000 gives 57.9, so the choice is not sensitive). One alpha for all settings so they differ only in rest inputs. B0018 not used |
